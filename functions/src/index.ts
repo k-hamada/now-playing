@@ -28,6 +28,17 @@ export const nowPlaying = functions.region(REGION).https.onRequest(async (_reque
     console.info(`start`)
     const db = admin.firestore()
 
+    const RefreshAccessToken = async function () {
+        console.info(`refresh accessToken`)
+        const refreshAccessTokenResponse = await spotifyApi.refreshAccessToken()
+        // console.info(refreshAccessTokenResponse.body);
+        const newAccessToken = refreshAccessTokenResponse.body['access_token']
+        spotifyApi.setAccessToken(newAccessToken);
+
+        // console.info(`write accessToken: ${newAccessToken}`)
+        await db.collection('spotify').doc('config').set({'access_token': newAccessToken})
+    }
+
     try {
         console.info(`get accessToken`)
         const accessToken = await db.collection('spotify').doc('config').get().then(doc => doc.get('access_token'))
@@ -57,27 +68,13 @@ export const nowPlaying = functions.region(REGION).https.onRequest(async (_reque
         console.info(`add PlayingTrack latest`)
         await playingTracks.set({latest: playingTrack})
 
-        console.info(`refresh accessToken`)
-        const refreshAccessToken = await spotifyApi.refreshAccessToken()
-        console.info(refreshAccessToken.body);
-        const newAccessToken = refreshAccessToken.body['access_token']
-        spotifyApi.setAccessToken(newAccessToken);
-
-        // console.info(`write accessToken: ${newAccessToken}`)
-        await db.collection('spotify').doc('config').set({'access_token': newAccessToken})
+        await RefreshAccessToken();
 
         return response.status(200).send(JSON.stringify(playingTrack))
     } catch (error) {
         console.error(error)       
 
-        console.info(`refresh accessToken`)
-        const refreshAccessToken = await spotifyApi.refreshAccessToken()
-        // console.info(refreshAccessToken.body);
-        const newAccessToken = refreshAccessToken.body['access_token']
-        spotifyApi.setAccessToken(newAccessToken);
-
-        // console.info(`write accessToken: ${newAccessToken}`)
-        await db.collection('spotify').doc('config').set({'access_token': newAccessToken})
+        await RefreshAccessToken();
 
         return response.status(400).send(`error`)
     }
