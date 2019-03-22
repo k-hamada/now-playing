@@ -15,7 +15,7 @@ type PlayingTrack = {
 
 const SpotifyWebApi = require('spotify-web-api-node')
 const spotifyCredentials = functions.config().spotify.credentials;
-console.info(spotifyCredentials)
+// console.info(spotifyCredentials)
 const spotifyApi = new SpotifyWebApi({
     clientId: spotifyCredentials.client_id,
     clientSecret: spotifyCredentials.client_secret,
