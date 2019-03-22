@@ -1,17 +1,10 @@
 import * as admin from 'firebase-admin';
 import * as functions from 'firebase-functions';
 import { RootObject } from './interfaces/spotify-get-users-currently-playing-track'
+import { PlayingTrack } from './types/playing-track';
 
 admin.initializeApp();
 const REGION = 'asia-northeast1';
-
-type PlayingTrack = {
-    item_name: string,
-    item_uri: string
-    artist_names: string[],
-    artist_uris: string[],
-    timestamp: number
-}
 
 const SpotifyWebApi = require('spotify-web-api-node')
 const spotifyCredentials = functions.config().spotify.credentials;
