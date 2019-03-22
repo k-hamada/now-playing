@@ -36,7 +36,7 @@ export const nowPlaying = functions.region(REGION).https.onRequest(async (_reque
         spotifyApi.setAccessToken(newAccessToken);
 
         // console.info(`write accessToken: ${newAccessToken}`)
-        await db.collection('spotify').doc('config').set({'access_token': newAccessToken})
+        await db.collection('spotify').doc('config').set({ 'access_token': newAccessToken })
     }
 
     try {
@@ -46,12 +46,20 @@ export const nowPlaying = functions.region(REGION).https.onRequest(async (_reque
         // console.info(`set accessToken: ${accessToken}`)
 
         console.info(`get MyCurrentPlayingTrack`)
-        const myCurrentPlayingTrack = await spotifyApi.getMyCurrentPlayingTrack();
-        if (myCurrentPlayingTrack.statusCode !== 200) {
-            console.error(myCurrentPlayingTrack)
-            throw new Error(`statusCode: ${myCurrentPlayingTrack.statusCode}`)
+        const myCurrentPlayingTrackResponse = await spotifyApi.getMyCurrentPlayingTrack();
+        if (myCurrentPlayingTrackResponse.statusCode !== 200) {
+            if (myCurrentPlayingTrackResponse.statusCode === 204) {
+                console.info(`No Content`)
+            } else {
+                console.error(myCurrentPlayingTrackResponse)
+            }
+
+            await RefreshAccessToken();
+
+            return response.status(myCurrentPlayingTrackResponse.statusCode).send(JSON.stringify(myCurrentPlayingTrackResponse))
         }
-        const root: RootObject = myCurrentPlayingTrack.body;
+
+        const root: RootObject = myCurrentPlayingTrackResponse.body;
         const playingTrack: PlayingTrack = {
             item_name:    root.item.name,
             item_uri:     root.item.uri,
