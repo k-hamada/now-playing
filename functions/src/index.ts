@@ -54,6 +54,14 @@ export const nowPlaying = functions.region(REGION).https.onRequest(async (_reque
 
         const root: RootObject = myCurrentPlayingTrackResponse.body;
         console.info(root)
+
+        if (root.currently_playing_type !== 'track')
+        {
+            console.info(`skip ${root.currently_playing_type}`)
+            await RefreshAccessToken()
+            return
+        }
+
         const playingTrack: PlayingTrack = {
             item_name:    root.item.name,
             item_uri:     root.item.uri,

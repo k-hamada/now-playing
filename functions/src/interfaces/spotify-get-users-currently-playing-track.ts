@@ -89,7 +89,7 @@ export interface RootObject {
     context: Context;
     progress_ms: number;
     item: Item;
-    currently_playing_type: string;
+    currently_playing_type: 'track' | 'episode' | 'ad' | 'unknown';
     actions: Actions;
     is_playing: boolean;
 }
